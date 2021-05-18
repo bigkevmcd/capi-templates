@@ -33,7 +33,7 @@ func (f FSLibrary) Flavours() ([]*flavours.Flavour, error) {
 				return nil, fmt.Errorf("failed to parse: %w", err)
 			}
 
-			params, err := paramsFromSpec(t.Spec)
+			params, err := flavours.ParamsFromSpec(t.Spec)
 			if err != nil {
 				return nil, err
 			}
@@ -46,28 +46,4 @@ func (f FSLibrary) Flavours() ([]*flavours.Flavour, error) {
 	}
 	sort.Slice(found, func(i, j int) bool { return found[i].Name < found[j].Name })
 	return found, nil
-}
-
-func paramsFromSpec(s flavours.CAPITemplateSpec) ([]flavours.Param, error) {
-	paramNames, err := flavours.Params(s)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get params from template: %w", err)
-	}
-	paramsMeta := map[string]flavours.Param{}
-	for _, v := range paramNames {
-		paramsMeta[v] = flavours.Param{Name: v}
-	}
-
-	for _, v := range s.Params {
-		if m, ok := paramsMeta[v.Name]; ok {
-			m.Description = v.Description
-			paramsMeta[v.Name] = m
-		}
-	}
-
-	var params []flavours.Param
-	for _, v := range paramsMeta {
-		params = append(params, v)
-	}
-	return params, nil
 }

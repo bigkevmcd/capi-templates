@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"sort"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	processor "sigs.k8s.io/cluster-api/cmd/clusterctl/client/yamlprocessor"
 	"sigs.k8s.io/yaml"
 )
@@ -15,12 +15,7 @@ func ParseFile(fname string) (*CAPITemplate, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read template: %w", err)
 	}
-	var t CAPITemplate
-	err = yaml.Unmarshal(b, &t)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal %s: %w", fname, err)
-	}
-	return &t, nil
+	return ParseBytes(b, fname)
 }
 
 func ParseFileFromFS(fsys fs.FS, fname string) (*CAPITemplate, error) {
@@ -28,10 +23,14 @@ func ParseFileFromFS(fsys fs.FS, fname string) (*CAPITemplate, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read template: %w", err)
 	}
+	return ParseBytes(b, fname)
+}
+
+func ParseBytes(b []byte, name string) (*CAPITemplate, error) {
 	var t CAPITemplate
-	err = yaml.Unmarshal(b, &t)
+	err := yaml.Unmarshal(b, &t)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal %s: %w", fname, err)
+		return nil, fmt.Errorf("failed to unmarshal %s: %w", name, err)
 	}
 	return &t, nil
 }
@@ -41,10 +40,6 @@ func Params(s CAPITemplateSpec) ([]string, error) {
 	proc := processor.NewSimpleProcessor()
 	variables := map[string]bool{}
 	for _, v := range s.ResourceTemplates {
-		var data unstructured.Unstructured
-		if err := data.UnmarshalJSON(v.RawExtension.Raw); err != nil {
-			return nil, fmt.Errorf("couldn't unmarshal json from the CAPITemplate: %v", err)
-		}
 		tv, err := proc.GetVariables(v.RawExtension.Raw)
 		if err != nil {
 			return nil, fmt.Errorf("processing template: %w", err)
@@ -57,5 +52,6 @@ func Params(s CAPITemplateSpec) ([]string, error) {
 	for k := range variables {
 		names = append(names, k)
 	}
+	sort.Strings(names)
 	return names, nil
 }

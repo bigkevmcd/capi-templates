@@ -1,6 +1,7 @@
 package flavours
 
 import (
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -39,6 +40,47 @@ func TestParseFile(t *testing.T) {
 	}
 }
 
+func TestParseFile_with_unknown_file(t *testing.T) {
+	_, err := ParseFile("testdata/unknownyaml")
+	assertErrorMatch(t, "failed to read template", err)
+}
+
+func TestParseFileFromFS(t *testing.T) {
+	c, err := ParseFileFromFS(os.DirFS("testdata"), "template2.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := &CAPITemplate{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "CAPITemplate",
+			APIVersion: "capi.weave.works/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "cluster-template2",
+		},
+		Spec: CAPITemplateSpec{
+			Description: "this is test template 2",
+			Params: []TemplateParam{
+				{
+					Name:        "AWS_SSH_KEY_NAME",
+					Description: "A description",
+				},
+			},
+
+			ResourceTemplates: []CAPIResourceTemplate{},
+		},
+	}
+	if diff := cmp.Diff(want, c, cmpopts.IgnoreFields(CAPITemplateSpec{}, "ResourceTemplates")); diff != "" {
+		t.Fatalf("failed to read the template:\n%s", diff)
+	}
+}
+
+func TestParseFileFromFS_with_unknown_file(t *testing.T) {
+	_, err := ParseFileFromFS(os.DirFS("testdata"), "unknown.yaml")
+	assertErrorMatch(t, "failed to read template", err)
+}
+
 func TestParams(t *testing.T) {
 	paramTests := []struct {
 		filename string
@@ -50,17 +92,17 @@ func TestParams(t *testing.T) {
 		},
 		{
 			filename: "testdata/template2.yaml",
-			want:     []string{"CLUSTER_NAME", "AWS_NODE_MACHINE_TYPE", "AWS_SSH_KEY_NAME"},
+			want: []string{
+				"AWS_NODE_MACHINE_TYPE",
+				"AWS_SSH_KEY_NAME",
+				"CLUSTER_NAME",
+			},
 		},
 	}
 
 	for _, tt := range paramTests {
 		t.Run(tt.filename, func(t *testing.T) {
-			c, err := ParseFile(tt.filename)
-			if err != nil {
-				t.Fatal(err)
-			}
-
+			c := mustParseFile(t, tt.filename)
 			params, err := Params(c.Spec)
 			if err != nil {
 				t.Fatal(err)

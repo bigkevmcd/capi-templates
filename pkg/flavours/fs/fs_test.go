@@ -31,13 +31,13 @@ func TestFlavours(t *testing.T) {
 			Description: "this is test template 2",
 			Params: []flavours.Param{
 				{
-					Name: "CLUSTER_NAME",
-				},
-				{
 					Name: "AWS_NODE_MACHINE_TYPE",
 				},
 				{
 					Name: "AWS_SSH_KEY_NAME",
+				},
+				{
+					Name: "CLUSTER_NAME",
 				},
 			},
 		},

@@ -8,14 +8,14 @@ import (
 
 // TemplateParam provides metadata for a template parameter.
 type TemplateParam struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
 }
 
 // CAPITemplateSpec holds the desired state of CAPITemplate.
 type CAPITemplateSpec struct {
 	Description       string                 `json:"description,omitempty"`
-	Params            []TemplateParam        `json:"params"`
+	Params            []TemplateParam        `json:"params,omitempty"`
 	ResourceTemplates []CAPIResourceTemplate `json:"resourcetemplates,omitempty"`
 }
 
