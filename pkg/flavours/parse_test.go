@@ -24,6 +24,13 @@ func TestParseFile(t *testing.T) {
 			Name: "cluster-template",
 		},
 		Spec: CAPITemplateSpec{
+			Description: "this is test template 1",
+			Params: []TemplateParam{
+				{
+					Name:        "CLUSTER_NAME",
+					Description: "This is used for the cluster naming.",
+				},
+			},
 			ResourceTemplates: []CAPIResourceTemplate{},
 		},
 	}
