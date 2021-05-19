@@ -42,3 +42,18 @@ type CAPITemplate struct {
 	// +optional
 	Status CAPITemplateStatus `json:"status,omitempty"`
 }
+
+type CAPITemplateMetadata struct {
+	metav1.TypeMeta `json:",inline"`
+	// +optional
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	// Spec holds the desired state of the CAPITemplate from the client
+	// +optional
+	Spec CAPITemplateMetadataSpec `json:"spec"`
+}
+
+// CAPITemplateMetadataSpec holds the desired state of CAPITemplateMetadata.
+type CAPITemplateMetadataSpec struct {
+	Description string          `json:"description,omitempty"`
+	Params      []TemplateParam `json:"params,omitempty"`
+}
