@@ -7,10 +7,11 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func Render(t *CAPITemplate, vars map[string]string) ([][]byte, error) {
+// Render takes a te
+func Render(spec CAPITemplateSpec, vars map[string]string) ([][]byte, error) {
 	proc := processor.NewSimpleProcessor()
 	var processed [][]byte
-	for _, v := range t.Spec.ResourceTemplates {
+	for _, v := range spec.ResourceTemplates {
 		b, err := proc.Process(v.RawExtension.Raw, func(n string) (string, error) {
 			if s, ok := vars[n]; ok {
 				return s, nil

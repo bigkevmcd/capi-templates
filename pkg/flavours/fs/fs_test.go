@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/bigkevmcd/capi-templates/pkg/flavours"
+	"github.com/bigkevmcd/capi-templates/test"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -44,5 +45,30 @@ func TestFlavours(t *testing.T) {
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Fatalf("failed to parse flavours:\n%s", diff)
+	}
+}
+
+func TestFlavours_with_unknown_directory(t *testing.T) {
+	f := New(os.DirFS("testdata"), "unknown")
+	_, err := f.Flavours()
+	test.AssertErrorMatch(t, "no such file or directory", err)
+}
+
+func TestFlavours_with_error_cases(t *testing.T) {
+	errorTests := []struct {
+		description string
+		dirname     string
+		errMsg      string
+	}{
+		{"invalid yaml", "badtemplates1", "failed to unmarshal badtemplates1/bad_template.yaml"},
+		{"invalid params", "badtemplates2", "failed to get params from template"},
+	}
+
+	for _, tt := range errorTests {
+		t.Run(tt.description, func(t *testing.T) {
+			f := New(os.DirFS("testdata"), tt.dirname)
+			_, err := f.Flavours()
+			test.AssertErrorMatch(t, tt.errMsg, err)
+		})
 	}
 }

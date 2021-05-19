@@ -1,6 +1,9 @@
 package flavours
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 // ParamsFromSpec extracts the named parameters from a CAPITemplate, finding all
 // the named parameters in each of the resource templates, and enriching that
@@ -29,5 +32,6 @@ func ParamsFromSpec(s CAPITemplateSpec) ([]Param, error) {
 	for _, v := range paramsMeta {
 		params = append(params, v)
 	}
+	sort.Slice(params, func(i, j int) bool { return params[i].Name < params[j].Name })
 	return params, nil
 }

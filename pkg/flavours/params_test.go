@@ -3,6 +3,7 @@ package flavours
 import (
 	"testing"
 
+	"github.com/bigkevmcd/capi-templates/test"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -42,7 +43,7 @@ func TestParamsFromSpec(t *testing.T) {
 func TestParamsFromSpec_with_bad_template(t *testing.T) {
 	parsed := mustParseFile(t, "testdata/bad_template.yaml")
 	_, err := ParamsFromSpec(parsed.Spec)
-	assertErrorMatch(t, "processing template: bad substitution", err)
+	test.AssertErrorMatch(t, "processing template: bad substitution", err)
 }
 
 func mustParseFile(t *testing.T, filename string) *CAPITemplate {

@@ -2,16 +2,16 @@ package flavours
 
 import (
 	"bytes"
-	"regexp"
 	"testing"
 
+	"github.com/bigkevmcd/capi-templates/test"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestRender(t *testing.T) {
 	parsed := mustParseFile(t, "testdata/template3.yaml")
 
-	b, err := Render(parsed, map[string]string{"CLUSTER_NAME": "testing"})
+	b, err := Render(parsed.Spec, map[string]string{"CLUSTER_NAME": "testing"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,8 +35,8 @@ metadata:
 func TestRender_unknown_parameter(t *testing.T) {
 	parsed := mustParseFile(t, "testdata/template3.yaml")
 
-	_, err := Render(parsed, map[string]string{})
-	assertErrorMatch(t, "value for variables.*CLUSTER_NAME.*is not set", err)
+	_, err := Render(parsed.Spec, map[string]string{})
+	test.AssertErrorMatch(t, "value for variables.*CLUSTER_NAME.*is not set", err)
 }
 
 func writeMultiDoc(t *testing.T, objs [][]byte) string {
@@ -51,21 +51,4 @@ func writeMultiDoc(t *testing.T, objs [][]byte) string {
 		}
 	}
 	return out.String()
-}
-
-func assertErrorMatch(t *testing.T, s string, e error) {
-	t.Helper()
-	if s == "" && e == nil {
-		return
-	}
-	if s != "" && e == nil {
-		t.Fatalf("wanted error matching %s, got nil", s)
-	}
-	match, err := regexp.MatchString(s, e.Error())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !match {
-		t.Fatalf("failed to match error %s against %s", e, s)
-	}
 }

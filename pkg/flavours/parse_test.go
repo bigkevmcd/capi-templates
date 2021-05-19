@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bigkevmcd/capi-templates/test"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
@@ -42,7 +43,7 @@ func TestParseFile(t *testing.T) {
 
 func TestParseFile_with_unknown_file(t *testing.T) {
 	_, err := ParseFile("testdata/unknownyaml")
-	assertErrorMatch(t, "failed to read template", err)
+	test.AssertErrorMatch(t, "failed to read template", err)
 }
 
 func TestParseFileFromFS(t *testing.T) {
@@ -78,7 +79,7 @@ func TestParseFileFromFS(t *testing.T) {
 
 func TestParseFileFromFS_with_unknown_file(t *testing.T) {
 	_, err := ParseFileFromFS(os.DirFS("testdata"), "unknown.yaml")
-	assertErrorMatch(t, "failed to read template", err)
+	test.AssertErrorMatch(t, "failed to read template", err)
 }
 
 func TestParams(t *testing.T) {
