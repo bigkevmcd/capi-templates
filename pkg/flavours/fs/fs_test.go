@@ -20,6 +20,18 @@ func TestFlavours(t *testing.T) {
 		{
 			Name:        "cluster-template1",
 			Description: "this is test template 1",
+			Version:     "1.2.3",
+			Params: []flavours.Param{
+				{
+					Name:        "CLUSTER_NAME",
+					Description: "This is used for the cluster naming.",
+				},
+			},
+		},
+		{
+			Name:        "cluster-template1",
+			Description: "this is test template 1",
+			Version:     "2.1.0",
 			Params: []flavours.Param{
 				{
 					Name:        "CLUSTER_NAME",
@@ -30,6 +42,7 @@ func TestFlavours(t *testing.T) {
 		{
 			Name:        "cluster-template2",
 			Description: "this is test template 2",
+			Version:     "1.2.3",
 			Params: []flavours.Param{
 				{
 					Name: "AWS_NODE_MACHINE_TYPE",
@@ -60,7 +73,7 @@ func TestFlavours_with_error_cases(t *testing.T) {
 		dirname     string
 		errMsg      string
 	}{
-		{"invalid yaml", "badtemplates1", "failed to unmarshal badtemplates1/bad_template.yaml"},
+		{"invalid yaml", "badtemplates1", "failed to unmarshal badtemplates1/0.0.1/bad_template.yaml"},
 		{"invalid params", "badtemplates2", "failed to get params from template"},
 	}
 
