@@ -3,13 +3,18 @@ package flavours
 import (
 	"os"
 	"testing"
+	"io/ioutil"
 
 	"github.com/bigkevmcd/capi-templates/test"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 )
+
+var serializer = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 func TestParseFile(t *testing.T) {
 	c, err := ParseFile("testdata/template1.yaml")
@@ -80,6 +85,48 @@ func TestParseFileFromFS(t *testing.T) {
 func TestParseFileFromFS_with_unknown_file(t *testing.T) {
 	_, err := ParseFileFromFS(os.DirFS("testdata"), "unknown.yaml")
 	test.AssertErrorMatch(t, "failed to read template", err)
+}
+
+
+func TestParseConfigmap(t *testing.T) {
+	cmBytes, err := ioutil.ReadFile("testdata/configmap1.yaml")
+    if err != nil {
+		t.Fatal(err)
+	}
+
+	var data unstructured.Unstructured
+	cm, gvk, err := serializer.Decode(cmBytes, nil, &data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tm, err := ParseConfigmap(cm)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := &CAPITemplate{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "CAPITemplate",
+			APIVersion: "capi.weave.works/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "cluster-template",
+		},
+		Spec: CAPITemplateSpec{
+			Description: "this is test template 1",
+			Params: []TemplateParam{
+				{
+					Name:        "CLUSTER_NAME",
+					Description: "This is used for the cluster naming.",
+				},
+			},
+			ResourceTemplates: []CAPIResourceTemplate{},
+		},
+	}
+	if diff := cmp.Diff(want, tm["template1"], cmpopts.IgnoreFields(CAPITemplateSpec{}, "ResourceTemplates")); diff != "" {
+		t.Fatalf("failed to read the template from the configmap:\n%s", diff)
+	}
 }
 
 func TestParams(t *testing.T) {
