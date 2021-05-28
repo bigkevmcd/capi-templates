@@ -9,8 +9,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/kubernetes/scheme"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestParseFile(t *testing.T) {
@@ -91,13 +92,16 @@ func TestParseConfigMap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var data unstructured.Unstructured
-	cm, gvk, err := serializer.Decode(cmBytes, nil, &data)
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+
+	obj, _, err := decode(cmBytes, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	tm, err := ParseConfigMap(cm)
+	cm := obj.(*corev1.ConfigMap)
+
+	tm, err := ParseConfigMap(*cm)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -38,7 +38,7 @@ func ParseBytes(b []byte, name string) (*CAPITemplate, error) {
 
 // ParseConfigmap returns a map of CAPITemplates indexed by their name.
 // The name of the template is set to the key of the ConfigMap.Data map.
-func ParseConfigmap(cm corev1.ConfigMap) (map[string]*CAPITemplate, error) {
+func ParseConfigMap(cm corev1.ConfigMap) (map[string]*CAPITemplate, error) {
 	tm := map[string]*CAPITemplate{}
 
 	for k, v := range(cm.Data) {
