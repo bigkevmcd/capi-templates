@@ -39,12 +39,12 @@ func ParseBytes(b []byte, name string) (*CAPITemplate, error) {
 // ParseConfigmap returns a map of CAPITemplates indexed by their name.
 // The name of the template is set to the key of the Configmap.Data map.
 func ParseConfigmap(cm corev1.Configmap) (map[string]*CAPITemplate, error) {
-	tm := map[string]*CAPITemplate
+	tm := map[string]*CAPITemplate{}
 
 	for k, v := range(cm) {
 		t, err := ParseBytes([]byte(v), k)
 		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal template %s from configmap %s, err: %w", name, cm.Metadata.Name, err)
+			return nil, fmt.Errorf("failed to unmarshal template %s from configmap %s, err: %w", k, cm.Metadata.Name, err)
 		}
 		tm[k] = t
 	}

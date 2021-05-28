@@ -11,10 +11,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 )
-
-var serializer = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 func TestParseFile(t *testing.T) {
 	c, err := ParseFile("testdata/template1.yaml")
