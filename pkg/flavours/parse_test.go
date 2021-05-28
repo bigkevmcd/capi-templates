@@ -88,7 +88,7 @@ func TestParseFileFromFS_with_unknown_file(t *testing.T) {
 
 func TestParseConfigMap(t *testing.T) {
 	cmBytes, err := ioutil.ReadFile("testdata/configmap1.yaml")
-    if err != nil {
+	if err != nil {
 		t.Fatal(err)
 	}
 
