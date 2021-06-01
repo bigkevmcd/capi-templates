@@ -92,9 +92,7 @@ func TestParseConfigMap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	decode := scheme.Codecs.UniversalDeserializer().Decode
-
-	obj, _, err := decode(cmBytes, nil, nil)
+	obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(cmBytes, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,26 +104,28 @@ func TestParseConfigMap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want := &CAPITemplate{
-		TypeMeta: metav1.TypeMeta{
+	want := map[string]*CAPITemplate{
+		"template1": {
+			TypeMeta: metav1.TypeMeta{
 			Kind:       "CAPITemplate",
 			APIVersion: "capi.weave.works/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "cluster-template",
-		},
-		Spec: CAPITemplateSpec{
-			Description: "this is test template 1",
-			Params: []TemplateParam{
-				{
-					Name:        "CLUSTER_NAME",
-					Description: "This is used for the cluster naming.",
-				},
 			},
-			ResourceTemplates: []CAPIResourceTemplate{},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "cluster-template",
+			},
+			Spec: CAPITemplateSpec{
+				Description: "this is test template 1",
+				Params: []TemplateParam{
+					{
+						Name:        "CLUSTER_NAME",
+						Description: "This is used for the cluster naming.",
+					},
+				},
+				ResourceTemplates: []CAPIResourceTemplate{},
+			},
 		},
 	}
-	if diff := cmp.Diff(want, tm["template1"], cmpopts.IgnoreFields(CAPITemplateSpec{}, "ResourceTemplates")); diff != "" {
+	if diff := cmp.Diff(want, tm, cmpopts.IgnoreFields(CAPITemplateSpec{}, "ResourceTemplates")); diff != "" {
 		t.Fatalf("failed to read the template from the configmap:\n%s", diff)
 	}
 }
