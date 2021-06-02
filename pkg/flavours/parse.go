@@ -8,6 +8,7 @@ import (
 
 	processor "sigs.k8s.io/cluster-api/cmd/clusterctl/client/yamlprocessor"
 	"sigs.k8s.io/yaml"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func ParseFile(fname string) (*CAPITemplate, error) {
@@ -33,6 +34,21 @@ func ParseBytes(b []byte, name string) (*CAPITemplate, error) {
 		return nil, fmt.Errorf("failed to unmarshal %s: %w", name, err)
 	}
 	return &t, nil
+}
+
+// ParseConfigMap parses a ConfigMap and returns a map of CAPITemplates indexed by their name.
+// The name of the template is set to the key of the ConfigMap.Data map.
+func ParseConfigMap(cm corev1.ConfigMap) (map[string]*CAPITemplate, error) {
+	tm := map[string]*CAPITemplate{}
+
+	for k, v := range(cm.Data) {
+		t, err := ParseBytes([]byte(v), k)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal template %s from configmap %s, err: %w", k, cm.ObjectMeta.Name, err)
+		}
+		tm[k] = t
+	}
+	return tm, nil
 }
 
 // Params extracts the named parameters from resource templates in a spec.
